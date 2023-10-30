@@ -37,20 +37,36 @@ class HomeScreenControll with ChangeNotifier {
         await http.post(url, body: {"employee_name": name, "designation": des});
 
     if (response.statusCode == 200) {
-      var decodedData = jsonDecode(response.body);
-      print(response.body);
-      employeeListResponse = EmployeesListResModel.fromJson(decodedData);
-      employeesList = employeeListResponse?.employees ?? [];
+      getEmployeeList();
     } else {
       print("Failed to load employees");
     }
 
     isLoading = false;
-    getEmployeeList();
+
     notifyListeners();
   }
 
-  updateEmployee() {}
+  updateEmployeeData(
+      {required String id,
+      required String newName,
+      required String newdes}) async {
+    isLoading = true;
+    notifyListeners();
+    final url = Uri.parse("${ApiConfig.baseUrl}api/addemployee/$id/");
+    final response = await http
+        .put(url, body: {"employee_name": newName, "designation": newdes});
+
+    if (response.statusCode == 200) {
+      getEmployeeList();
+    } else {
+      print("Failed to load employees");
+    }
+
+    isLoading = false;
+
+    notifyListeners();
+  }
 
   deleteEmployee({required String id}) async {
     isLoading = true;
@@ -60,16 +76,13 @@ class HomeScreenControll with ChangeNotifier {
 
     if (response.statusCode == 200) {
       print("successfully deleted");
-      // var decodedData = jsonDecode(response.body);
-      // print(response.body);
-      // employeeListResponse = EmployeesListResModel.fromJson(decodedData);
-      // employeesList = employeeListResponse?.employees ?? [];
+      getEmployeeList();
     } else {
       print("Failed to delete employees");
     }
 
     isLoading = false;
-    getEmployeeList();
+
     notifyListeners();
   }
 }
